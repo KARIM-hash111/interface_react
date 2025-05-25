@@ -12,13 +12,13 @@ function AddReservation() {
   const [form, setForm] = useState({
     date_depart: "",
     date_fin: "",
-    montant_total: "",
     statut: "en_attente",
     mode_paiement: "carte_bancaire",
     id_client: "",
     id_chambre_tarif: "",
   });
   const [showChambreTarifForm, setShowChambreTarifForm] = useState(false);
+  const [chambreTarifSaved, setChambreTarifSaved] = useState(false);
 
   // Fetch chambre_tarifs for select options
   const { chambreTarifs } = useSelector((state) => state.chambreTarifs);
@@ -36,12 +36,25 @@ function AddReservation() {
     navigate("/reservations");
   };
 
+  // Handler to show the chambre-tarif form
+  const handleShowChambreTarifForm = () => {
+    setShowChambreTarifForm(true);
+    setChambreTarifSaved(false);
+  };
+
+  // Handler to call after chambre-tarif is saved
+  const handleChambreTarifSaved = () => {
+    setChambreTarifSaved(true);
+    setShowChambreTarifForm(false);
+    dispatch(fetchChambreTarifs());
+  };
+
   return (
     <div>
       <h2>Add New Reservation</h2>
       <button
         type="button"
-        onClick={() => setShowChambreTarifForm(true)}
+        onClick={handleShowChambreTarifForm}
         style={{ marginBottom: 16 }}
       >
         ➕ Create Room-Tariff Association
@@ -50,7 +63,7 @@ function AddReservation() {
         <div
           style={{ border: "1px solid #ddd", padding: 16, marginBottom: 16 }}
         >
-          <AddChambreTarif />
+          <AddChambreTarif onSave={handleChambreTarifSaved} noRedirect />
           <button
             type="button"
             onClick={() => setShowChambreTarifForm(false)}
@@ -58,6 +71,12 @@ function AddReservation() {
           >
             Close
           </button>
+        </div>
+      )}
+      {/* Optionally show a message after save */}
+      {chambreTarifSaved && (
+        <div style={{ color: "green", marginBottom: 16 }}>
+          Room-Tariff Association created successfully!
         </div>
       )}
       <form onSubmit={handleSubmit}>
@@ -77,16 +96,6 @@ function AddReservation() {
             type="date"
             name="date_fin"
             value={form.date_fin}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Total Amount:</label>
-          <input
-            type="number"
-            name="montant_total"
-            value={form.montant_total}
             onChange={handleChange}
             required
           />
@@ -139,7 +148,10 @@ function AddReservation() {
             <option value="">Select Room-Tariff ID</option>
             {chambreTarifs &&
               chambreTarifs.map((ct) => (
-                <option key={ct.id_chambre_tarif || ct.id} value={ct.id_chambre_tarif || ct.id}>
+                <option
+                  key={ct.id_chambre_tarif || ct.id}
+                  value={ct.id_chambre_tarif || ct.id}
+                >
                   {ct.id_chambre_tarif || ct.id}
                 </option>
               ))}

@@ -4,7 +4,7 @@ import { addChambreTarif } from "./chambreTarifsSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function AddChambreTarif() {
+function AddChambreTarif({ onSave, noRedirect }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -35,8 +35,10 @@ function AddChambreTarif() {
       id_chambre: form.id_chambre,
       id_tarif: form.id_tarif,
     };
-    dispatch(addChambreTarif(payload));
-    navigate("/chambre-tarifs");
+    dispatch(addChambreTarif(payload)).then(() => {
+      if (onSave) onSave();
+      if (!noRedirect) navigate("/chambre-tarifs");
+    });
   };
 
   return (
